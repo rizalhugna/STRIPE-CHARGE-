@@ -251,5 +251,58 @@ def root():
         }
     }), 200
 
+# Webhook endpoint untuk menerima pesan dari Telegram
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    try:
+        update = request.get_json()
+        
+        # Cek apakah ada pesan
+        if 'message' in update:
+            message = update['message']
+            chat_id = message['chat']['id']
+            text = message.get('text', '')
+            
+            # Format pesan: /stripe_auth CC|MM|YY|CVV
+            # Contoh: /stripe_auth 4582862479037369|02|2027|556
+            
+            if text.startswith('/stripe_auth'):
+                card = text.replace('/stripe_auth', '').strip()
+                # Proses card disini
+                # Kirim hasilnya ke Telegram
+                send_telegram_message(chat_id, f"Processing card: {card}")
+                
+            elif text.startswith('/stripe_charge'):
+                card = text.replace('/stripe_charge', '').strip()
+                send_telegram_message(chat_id, f"Processing charge: {card}")
+                
+            elif text.startswith('/braintree'):
+                card = text.replace('/braintree', '').strip()
+                send_telegram_message(chat_id, f"Processing braintree: {card}")
+                
+            else:
+                send_telegram_message(chat_id, 
+                    "Available commands:\n"
+                    "/stripe_auth CC|MM|YY|CVV - Check card with Stripe Auth\n"
+                    "/stripe_charge CC|MM|YY|CVV - Check card with Stripe Charge\n"
+                    "/braintree CC|MM|YY|CVV - Check card with Braintree")
+        
+        return jsonify({"status": "ok"}), 200
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        return jsonify({"status": "error"}), 500
+
+def send_telegram_message(chat_id, text):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+    try:
+        requests.post(url, json=payload, timeout=30)
+    except Exception as e:
+        print(f"Failed to send message: {e}")
+        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000, debug=False)
